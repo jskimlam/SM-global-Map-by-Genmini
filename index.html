@@ -6,118 +6,161 @@
     <title>Global SM Plant Status (Made by LAM)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root { --primary-blue: #0A2647; --accent-blue: #2C74B3; --bg-light: #F0F5F9; --trouble-black: #1A1A1B; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Pretendard', sans-serif; background: var(--bg-light); }
-        #map { height: 100vh; width: 100vw; background: #DAEAF1; }
+        :root { --primary: #0A2647; --accent: #1597bb; --bg-light: #F5F7F8; --text-dark: #333; --trouble: #222; }
+        body { margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+        
+        /* 메인 레이아웃 */
+        #map-container { position: relative; height: 100vh; width: 100%; transition: margin-left 0.3s ease-in-out; }
+        #map { height: 100%; width: 100%; background: #eef2f3; }
 
-        /* BI Title */
-        .title-bar { position: absolute; top: 20px; left: 20px; z-index: 1000; background: var(--primary-blue); color: white; padding: 15px 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        .title-bar h1 { margin: 0; font-size: 1.4rem; letter-spacing: 1px; }
+        /* 사이드바 디자인 */
+        #sidebar {
+            position: fixed; top: 0; left: -350px; /* 초기 숨김 상태 */
+            width: 350px; height: 100%; background: white; z-index: 1000;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.1); transition: left 0.3s ease-in-out;
+            display: flex; flex-direction: column;
+        }
+        #sidebar.active { left: 0; }
 
-        /* Side Dashboard */
-        #side-panel { position: absolute; top: 0; right: 0; width: 420px; height: 100%; background: white; z-index: 2000; transition: transform 0.4s ease; box-shadow: -10px 0 30px rgba(0,0,0,0.1); overflow-y: auto; padding: 30px; }
-        #side-panel.hidden { transform: translateX(100%); }
-        .toggle-handle { position: absolute; left: -45px; top: 50%; width: 45px; height: 90px; background: var(--primary-blue); border-radius: 12px 0 0 12px; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        /* 사이드바 헤더 및 요약 */
+        .sidebar-header { background: var(--primary); color: white; padding: 20px; }
+        .sidebar-header h2 { margin: 0; font-size: 1.2rem; font-weight: 600; }
+        .bi-summary { display: flex; justify-content: space-between; padding: 15px 20px; background: var(--accent); color: white; }
+        .summary-item span { display: block; font-size: 0.8rem; opacity: 0.9; }
+        .summary-item strong { font-size: 1.1rem; }
 
-        /* BI Widgets */
-        .widget { background: var(--bg-light); border-radius: 12px; padding: 20px; margin-bottom: 25px; border-left: 6px solid var(--accent-blue); }
-        .widget-title { font-size: 0.85rem; color: #666; font-weight: 700; margin-bottom: 15px; text-transform: uppercase; }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; }
-        .progress-bg { height: 6px; background: #DDE6ED; border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--accent-blue); border-radius: 3px; }
+        /* 리스트 영역 */
+        #list-container { flex-grow: 1; overflow-y: auto; padding: 10px; background: var(--bg-light); }
+        .plant-item {
+            background: white; padding: 12px 15px; margin-bottom: 10px; border-radius: 8px;
+            border-left: 4px solid var(--accent); cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .plant-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .plant-item.trouble { border-left-color: var(--trouble); }
+        .plant-name { font-weight: bold; color: var(--primary); margin-bottom: 5px; }
+        .plant-detail { font-size: 0.85rem; color: #666; display: flex; justify-content: space-between; }
+        .status-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
 
-        /* Popup Style */
-        .leaflet-popup-content-wrapper { border-radius: 12px; padding: 5px; }
-        .popup-card b { color: var(--accent-blue); }
+        /* 토글 버튼 */
+        #sidebar-toggle {
+            position: absolute; top: 20px; left: 20px; z-index: 1100;
+            background: var(--primary); color: white; border: none;
+            padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* 팝업 스타일 */
+        .leaflet-popup-content-wrapper { border-radius: 8px; }
+        .popup-content h3 { margin: 0 0 8px 0; color: var(--primary); }
+        .popup-content p { margin: 5px 0; font-size: 0.9rem; color: #555; }
     </style>
 </head>
 <body>
 
-<div class="title-bar"><h1>Global SM Plant Status <small style="font-weight: 300; font-size: 0.8rem;">by LAM</small></h1></div>
-
-<div id="side-panel">
-    <button class="toggle-handle" onclick="toggleUI()">📊</button>
-    <h2 style="color: var(--primary-blue); margin-top: 0;">Market Insight</h2>
-    
-    <div class="widget">
-        <div class="widget-title">Regional Capacity Share</div>
-        <div id="region-list"></div>
+    <div id="sidebar">
+        <div class="sidebar-header">
+             <h2>Global SM Plant Status <span style="font-weight:300; font-size:0.8rem;">| by LAM</span></h2>
+        </div>
+        <div class="bi-summary">
+            <div class="summary-item"><span>Total Capa</span><strong id="total-capa">-</strong></div>
+            <div class="summary-item" style="text-align: right;"><span>Current Loss</span><strong style="color:#ffcccb;" id="current-loss">-</strong></div>
+        </div>
+        <div id="list-container">
+            </div>
     </div>
 
-    <div class="widget">
-        <div class="widget-title">Current Supply Loss (2026.02)</div>
-        <div id="total-loss" style="font-size: 1.8rem; font-weight: 800; color: #D61C4E;">0 MT</div>
-        <p style="font-size: 0.8rem; color: #888;">*Based on current maintenance/trouble reports</p>
+    <div id="map-container">
+        <button id="sidebar-toggle">☰ List View</button>
+        <div id="map"></div>
     </div>
 
-    <div class="widget">
-        <div class="widget-title">Active Trouble Tracker</div>
-        <div id="trouble-list" style="font-size: 0.9rem;"></div>
-    </div>
-</div>
-
-<div id="map"></div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-    const map = L.map('map', { zoomControl: false }).setView([30, 110], 4);
-    
-    // 민자 스타일 지도 (CartoDB Light)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+    // 1. 지도 초기화 (민자 스타일)
+    const map = L.map('map', { zoomControl: false }).setView([30, 115], 4);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '©OpenStreetMap, ©CartoDB'
+    }).addTo(map);
+    L.control.zoom({ position: 'topright' }).addTo(map);
 
-    function toggleUI() { document.getElementById('side-panel').classList.toggle('hidden'); }
+    // 2. 사이드바 토글 기능 (샘플 방식 적용)
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+    });
 
+    // 전역 변수 설정
+    let geoJsonLayer;
+    let totalCapacity = 0;
+    let currentLoss = 0;
+
+    // 3. 데이터 로드 및 처리
     fetch('data.json')
-    .then(res => res.json())
-    .then(data => {
-        const totalGlobal = data.total_global_capacity;
-        let totalLoss = 0;
-        const regionStats = {};
+        .then(response => response.json())
+        .then(data => {
+            totalCapacity = data.metadata.total_global_capacity;
+            const listContainer = document.getElementById('list-container');
 
-        data.plants.forEach(p => {
-            const isIssue = (p.status === 'Maintenance' || p.status === 'Trouble' || p.status === 'Shutdown');
-            const color = isIssue ? '#1A1A1B' : '#2C74B3';
-            const radius = Math.sqrt(p.capacity) * 1.8; // Capacity 비례 사이즈
+            geoJsonLayer = L.geoJSON(data, {
+                // 마커 스타일링 (케파별 크기, 상태별 색상)
+                pointToLayer: function (feature, latlng) {
+                    const p = feature.properties;
+                    const isTrouble = p.status !== 'Normal';
+                    if (isTrouble) currentLoss += (p.loss || 0);
 
-            const marker = L.circleMarker([p.lat, p.lng], {
-                radius: radius,
-                fillColor: color,
-                color: "white",
-                weight: 2,
-                fillOpacity: 0.8
+                    return L.circleMarker(latlng, {
+                        radius: Math.sqrt(p.capacity) * 1.5, // 케파 비례 크기
+                        fillColor: isTrouble ? '#222' : '#1597bb', // 트러블 시 검은색
+                        color: "white",
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    });
+                },
+                // 각 기능 연결 (팝업 및 리스트 생성)
+                onEachFeature: function (feature, layer) {
+                    const p = feature.properties;
+                    
+                    // 팝업 바인딩
+                    const popupContent = `
+                        <div class="popup-content">
+                            <h3>${p.name}</h3>
+                            <p><b>Location:</b> ${p.city}<br><span style="font-size:0.8rem">${p.address}</span></p>
+                            <p><b>Capacity:</b> ${p.capacity}K MT / <b>Status:</b> <span style="color:${p.status!=='Normal'?'red':'green'}">${p.status}</span></p>
+                             <p style="font-size:0.8rem; color:#666;">* Remarks: ${p.remarks}</p>
+                        </div>
+                    `;
+                    layer.bindPopup(popupContent);
+
+                    // 사이드바 리스트 아이템 생성
+                    const item = document.createElement('div');
+                    item.className = `plant-item ${p.status !== 'Normal' ? 'trouble' : ''}`;
+                    item.innerHTML = `
+                        <div class="plant-name">${p.name}</div>
+                        <div class="plant-detail">
+                            <span>${p.city} (${p.capacity}K)</span>
+                             <span class="status-badge" style="background:${p.status!=='Normal'?'#222':'#1597bb'}; color:white;">${p.status}</span>
+                        </div>
+                    `;
+                    
+                    // 리스트 클릭 시 지도 인터랙션
+                    item.addEventListener('click', () => {
+                        map.flyTo(layer.getLatLng(), 9, { animate: true, duration: 1.5 });
+                        layer.openPopup();
+                        // 모바일 환경 등을 고려해 클릭 후 사이드바 닫기 (선택사항)
+                        // sidebar.classList.remove('active'); 
+                    });
+                    listContainer.appendChild(item);
+                }
             }).addTo(map);
 
-            const share = ((p.capacity / totalGlobal) * 100).toFixed(2);
-            marker.bindPopup(`
-                <div class="popup-card">
-                    <h3 style="margin:0 0 10px 0; color:${color}">${p.name}</h3>
-                    <b>City:</b> ${p.city}<br>
-                    <b>Address:</b> <span style="font-size:0.8rem; color:#666;">${p.address}</span><br>
-                    <b>Capacity:</b> ${p.capacity}K MT (${share}%)<br>
-                    <b>Status:</b> <span style="font-weight:bold; color:${isIssue?'red':'green'}">${p.status}</span>
-                </div>
-            `);
-
-            // 데이터 집계
-            totalLoss += p.loss;
-            regionStats[p.region] = (regionStats[p.region] || 0) + p.capacity;
-
-            if(isIssue) {
-                document.getElementById('trouble-list').innerHTML += 
-                `<div style="margin-bottom:8px;">⚠️ <b>${p.name}</b>: ${p.status} (Loss: ${p.loss}K)</div>`;
-            }
+            // BI 요약 정보 업데이트
+            document.getElementById('total-capa').innerText = totalCapacity.toLocaleString() + "K";
+            document.getElementById('current-loss').innerText = currentLoss.toLocaleString() + "K";
         });
-
-        // 사이드바 업데이트
-        document.getElementById('total-loss').innerText = totalLoss.toLocaleString() + "K MT";
-        Object.entries(regionStats).sort((a,b)=>b[1]-a[1]).forEach(([name, cap]) => {
-            const pct = ((cap / totalGlobal) * 100).toFixed(1);
-            document.getElementById('region-list').innerHTML += `
-                <div class="stat-row"><span>${name}</span><span>${cap}K (${pct}%)</span></div>
-                <div class="progress-bg"><div class="progress-fill" style="width:${pct}%"></div></div><br>
-            `;
-        });
-    });
 </script>
 </body>
 </html>
