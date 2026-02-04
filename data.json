@@ -1,15 +1,116 @@
 {
-  "total_global_capacity": 42500,
-  "last_updated": "2026-02-04",
-  "plants": [
-    { "name": "Anhui Haoyuan Chemical", "city": "Fuyang", "address": "No.1 Yuanfeng Road, Yingdong Economic Development Zone", "capacity": 260, "status": "Normal", "loss": 0, "lat": 32.91, "lng": 115.86, "region": "NEA" },
-    { "name": "Bora LyondellBasell", "city": "Panjin", "address": "Binhai Road, Liaodong Bay New District", "capacity": 350, "status": "Normal", "loss": 0, "lat": 40.71, "lng": 122.12, "region": "NEA" },
-    { "name": "Fujian Gulei Petrochemical", "city": "Zhangzhou", "address": "Gulei Avenue, Gulei Port Economic Development Zone", "capacity": 600, "status": "Maintenance", "loss": 0, "lat": 23.93, "lng": 117.61, "region": "NEA" },
-    { "name": "Tianjin Bohua Chemical", "city": "Binhai", "address": "Nangang 1st St, Nangang Industrial Zone", "capacity": 450, "status": "Trouble", "loss": 35, "lat": 38.68, "lng": 117.65, "region": "NEA" },
-    { "name": "Zhejiang Petroleum & Chem", "city": "Zhoushan", "address": "Yushan Island Base, Daishan County", "capacity": 2400, "status": "Normal", "loss": 0, "lat": 30.34, "lng": 122.15, "region": "NEA" },
-    { "name": "Shanghai SECCO", "city": "Jinshan", "address": "No. 557, Muhua Road, Shanghai Chemical Industry Park", "capacity": 650, "status": "Normal", "loss": 0, "lat": 30.74, "lng": 121.43, "region": "NEA" },
-    { "name": "Kuwait Styrene", "city": "Shuaiba", "address": "Shuaiba Industrial Area", "capacity": 525, "status": "Trouble", "loss": 40, "lat": 29.03, "lng": 48.11, "region": "Middle East" },
-    { "name": "Petrokemya (SABIC)", "city": "Al Jubail", "address": "Al Jubail Industrial City", "capacity": 1120, "status": "Trouble", "loss": 85, "lat": 27.01, "lng": 49.62, "region": "Middle East" },
-    { "name": "Lotte Chemical", "city": "Daesan", "address": "Daesan-eup, Seosan-si, Korea", "capacity": 580, "status": "Normal", "loss": 0, "lat": 37.03, "lng": 126.35, "region": "Korea" }
+  "type": "FeatureCollection",
+  "metadata": {
+    "title": "Global SM Plant Status 2026",
+    "total_global_capacity": 42500,
+    "last_updated": "2026-02-04"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "cn_fujian",
+        "name": "Fujian Gulei Petrochemical",
+        "city": "Zhangzhou",
+        "address": "Gulei Avenue, Gulei Port Economic Development Zone",
+        "capacity": 600,
+        "status": "Maintenance",
+        "loss": 0,
+        "region": "NEA",
+        "remarks": "정기보수 (Mar-Apr)"
+      },
+      "geometry": { "type": "Point", "coordinates": [117.61, 23.93] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "cn_tianjin_bohua",
+        "name": "Tianjin Bohua Chemical",
+        "city": "Binhai",
+        "address": "Nangang 1st St, Nangang Industrial Zone",
+        "capacity": 450,
+        "status": "Trouble",
+        "loss": 35,
+        "region": "NEA",
+        "remarks": "사고 복구 지연"
+      },
+      "geometry": { "type": "Point", "coordinates": [117.65, 38.68] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "me_petrokemya",
+        "name": "Petrokemya (SABIC)",
+        "city": "Al Jubail, Saudi Arabia",
+        "address": "Al Jubail Industrial City",
+        "capacity": 1120,
+        "status": "Trouble",
+        "loss": 85,
+        "region": "Middle East",
+        "remarks": "공정 트러블 (종료 미정)"
+      },
+      "geometry": { "type": "Point", "coordinates": [49.62, 27.01] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "kr_lotte",
+        "name": "Lotte Chemical",
+        "city": "Daesan, Korea",
+        "address": "Daesan-eup, Seosan-si",
+        "capacity": 580,
+        "status": "Normal",
+        "loss": 0,
+        "region": "Korea",
+        "remarks": "정상 가동"
+      },
+      "geometry": { "type": "Point", "coordinates": [126.35, 37.03] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "cn_zpc",
+        "name": "Zhejiang Petroleum & Chem",
+        "city": "Zhoushan",
+        "address": "Yushan Island Base, Daishan County",
+        "capacity": 2400,
+        "status": "Normal",
+        "loss": 0,
+        "region": "NEA",
+        "remarks": "세계 최대 단일 단지"
+      },
+      "geometry": { "type": "Point", "coordinates": [122.15, 30.34] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "eu_repsol",
+        "name": "Repsol",
+        "city": "Tarragona, Spain",
+        "address": "Polígon Industrial Sud, Tarragona",
+        "capacity": 450,
+        "status": "Maintenance",
+        "loss": 65,
+        "region": "Europe",
+        "remarks": "대규모 정기보수 (Jan-Mar)"
+      },
+      "geometry": { "type": "Point", "coordinates": [1.21, 41.11] }
+    },
+     {
+      "type": "Feature",
+      "properties": {
+        "id": "us_cosmar",
+        "name": "CosMar (Total/SABIC)",
+        "city": "Carville, USA",
+        "address": "River Road, Carville, LA",
+        "capacity": 1100,
+        "status": "Trouble",
+        "loss": 80,
+        "region": "North America",
+        "remarks": "설비 결함 (종료 미정)"
+      },
+      "geometry": { "type": "Point", "coordinates": [-91.11, 30.22] }
+    }
+    
   ]
 }
